@@ -108,7 +108,7 @@ class moodle:
     def get_code(self):
         img, nimg = self.img, self.nimg
 
-        pt.pytesseract.tesseract_cmd = r'C:\Users\ysh00\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
+        # pt.pytesseract.tesseract_cmd = r'C:\Users\ysh00\AppData\Local\Programs\Tesseract-OCR\tesseract.exe'
         def get_code(i) -> str:
             ans = pt.image_to_string(i, config = 'digits')
             ans = ''.join([i for i in ans if i.isdigit()])
@@ -164,7 +164,9 @@ class moodle:
 
         ns = bs(pre.text, 'html.parser')
         if len(ns.find_all('a', id = 'loginerrormessage')) >= 1:
-            error(ns.find('a', id = 'loginerrormessage').text)
+            message = ns.find('a', id = 'loginerrormessage').text
+            error(message)
+            self.error = message
             return False
         else:
             info('========== Final Token ==========')
