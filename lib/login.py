@@ -1,7 +1,6 @@
 from core.general import *
 
 import json
-from matplotlib import pyplot as plt
 
 import requests
 from bs4 import BeautifulSoup as bs
