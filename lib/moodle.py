@@ -3,6 +3,8 @@ from core.general import *
 import requests
 from bs4 import BeautifulSoup as bs
 
+import json
+
 class moodle(dict):
     def __init__(self, session: str = None, rq: requests.Session = None):
         if rq: self.rq = rq
@@ -31,7 +33,11 @@ class moodle(dict):
         return f'Moodle Session: {session}\nUsername: {this.username}'
     
     def check_logined(this):
-        return this.get_username() is not None
+        url = f'https://moodle.ncku.edu.tw/lib/ajax/service.php'
+        junk = this.rq.post(url, data = '''[{"index":0,"methodname":"core_fetch_notifications","args":{"contextid":1}}]''')
+        debug(json.loads(junk.text)[0])
+        this.logined = (not json.loads(junk.text)[0].get('error', True))
+        return this.logined
     
     def get_username(this):
         url = 'https://moodle.ncku.edu.tw'
