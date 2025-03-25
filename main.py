@@ -26,3 +26,11 @@ debug(encode(md.get_courses()))
 for i in md.get_courses():
     info(i.name)
     debug(encode(i))
+
+for i in md.get_courses()[::-1]:
+     for j in i.get_contents():
+          for k in j.content:
+               if k.type == 'modtype_forum':
+                    for l in moodle.discuss(k).get_topic():
+                        info(l.get_content())
+                        quit()

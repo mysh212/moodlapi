@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 
 import json
+from datetime import datetime
 
 class moodle(dict):
     def __init__(self, session: str = None, rq: requests.Session = None):
@@ -119,8 +120,63 @@ class resource(dict):
         this.type = type
         this.sync()
 
+    def copy(this, x):
+        this.course = x.course
+        this.name = x.name
+        this.url = x.url
+        this.html = x.html
+        this.type = x.type
+        this.sync()
+
     def sync(this):
         super().__init__(name = this.name, type = this.type, url = this.url)
 
     def __str__(this):
         return f'Name: {this.name}\nType: {this.type}\nURL: {this.url}'
+    
+class discuss(resource):
+    class content(dict):
+        def __init__(this, discuss, url, name):
+            this.discuss = discuss
+            this.url = url
+            this.name = name
+            this.title = None
+            this.content = None
+            this.user = None
+            this.time = None
+            this.sync()
+
+        def sync(this):
+            super().__init__(discuss = this.discuss, url = this.url, name = this.name, title = this.title, content = this.content, user = this.user, time = this.time)
+
+        def __str__(this):
+            return f'user: {this.user}\ntime: {this.time}\nURL: {this.url}\nname: {this.name}\ntitle: {this.title}'
+        
+        def get_content(this):
+            html = this.discuss.course.rq.get(this.url).text
+            soup = bs(html, 'html.parser')
+            header = soup.find(class_ = 'd-flex flex-column')
+            this.user = header.find('a').text.strip()
+            this.time = datetime.strptime(header.find('time').text, '%Y年 %m月 %d日(%a) %H:%M')
+            this.title = header.find('h3').text
+            this.content = soup.find('div', class_ = 'no-overflow w-100 content-alignment-container').find('div')
+            return this
+
+    def __init__(this, resource: resource):
+        if resource.type != 'modtype_forum':
+            warning('Converting resource which is not discuss into it.')
+        super().copy(resource)
+        this.topic = None
+
+    def get_topic(this):
+        if this.topic is not None: return this.topic;
+        this.topic = [discuss.content(this, i.find('a').get('href', None), i.find('a').text.strip()) if i.find('a') is not None else None for i in bs(this.course.rq.get(this.url).text, 'html.parser').find_all('th', class_ = 'topic')]
+        return this.topic
+    
+    # def get_content(this, index: int):
+    #     if len(this.topic) == 0:
+    #         this.get_topic()
+    #     if not 0 <= index < len(this.topic):
+    #         error('Invalid index getting content of a discuss thread')
+    #         return None
+        
