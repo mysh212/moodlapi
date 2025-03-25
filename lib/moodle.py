@@ -147,7 +147,7 @@ class discuss(resource):
             this.sync()
 
         def sync(this):
-            super().__init__(discuss = this.discuss, url = this.url, name = this.name, title = this.title, content = this.content, user = this.user, time = this.time)
+            super().__init__(discuss = this.discuss, url = this.url, name = this.name, title = this.title, content = str(this.content) if this.content is not None else None, user = this.user, time = str(this.time) if this.time is not None else None)
 
         def __str__(this):
             return f'user: {this.user}\ntime: {this.time}\nURL: {this.url}\nname: {this.name}\ntitle: {this.title}'
