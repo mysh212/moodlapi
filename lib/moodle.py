@@ -160,6 +160,7 @@ class discuss(resource):
             this.time = datetime.strptime(header.find('time').text, '%Y年 %m月 %d日(%a) %H:%M')
             this.title = header.find('h3').text
             this.content = soup.find('div', class_ = 'no-overflow w-100 content-alignment-container').find('div')
+            this.sync()
             return this
 
     def __init__(this, resource: resource):
