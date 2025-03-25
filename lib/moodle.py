@@ -168,7 +168,7 @@ class discuss(resource):
         super().copy(resource)
         this.topic = None
 
-    def get_topic(this):
+    def get_topics(this):
         if this.topic is not None: return this.topic;
         this.topic = [discuss.content(this, i.find('a').get('href', None), i.find('a').text.strip()) if i.find('a') is not None else None for i in bs(this.course.rq.get(this.url).text, 'html.parser').find_all('th', class_ = 'topic')]
         return this.topic

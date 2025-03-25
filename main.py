@@ -31,6 +31,6 @@ for i in md.get_courses()[::-1]:
      for j in i.get_contents():
           for k in j.content:
                if k.type == 'modtype_forum':
-                    for l in moodle.discuss(k).get_topic():
+                    for l in moodle.discuss(k).get_topics():
                         info(l.get_content())
                         quit()
