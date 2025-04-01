@@ -12,7 +12,7 @@ class moodle(dict):
         elif session: self.rq = requests.Session(); self.rq.cookies.set('MoodleSession', session, domain = 'moodle.ncku.edu.tw')
         else: error('Neither session nor requests session were given.'); exit(-1)
         self.soup = None
-        self.username = self.get_username()
+        self.username = self.get_username().strip()
         self.logined = self.username is not None
         self.sync()
     
@@ -111,6 +111,14 @@ class section(dict):
     def __str__(this):
         return f'Section Name: {this.name}\n' + '\n'.join([str(i) for i in this.content])
     
+    def init(this):
+        for i in range(len(this.content)):
+            ans = this.content[i].auto()
+            if ans == False: continue;
+            ans.init()
+            this.content[i] = ans
+        return this
+    
 class resource(dict):
     def __init__(this, course: course, name: str, html: bs, type = 'modtype_label', url = None):
         this.course = course
@@ -118,6 +126,7 @@ class resource(dict):
         this.url = url
         this.html = html
         this.type = type
+        this.content = None
         this.sync()
 
     def copy(this, x):
@@ -129,7 +138,19 @@ class resource(dict):
         this.sync()
 
     def sync(this):
-        super().__init__(name = this.name, type = this.type, url = this.url)
+        super().__init__(name = this.name, type = this.type, url = this.url, content = this.content)
+
+    def auto(this):
+        if this.type == 'modtype_forum':
+            return discuss(this)
+        return False
+    
+    def set_content(this, x):
+        this.content = x
+        this.sync()
+    
+    def init(this):
+        return this
 
     def __str__(this):
         return f'Name: {this.name}\nType: {this.type}\nURL: {this.url}'
@@ -147,7 +168,7 @@ class discuss(resource):
             this.sync()
 
         def sync(this):
-            super().__init__(discuss = this.discuss, url = this.url, name = this.name, title = this.title, content = str(this.content) if this.content is not None else None, user = this.user, time = str(this.time) if this.time is not None else None)
+            super().__init__(url = this.url, name = this.name, title = this.title, content = str(this.content) if this.content is not None else None, user = this.user, time = str(this.time) if this.time is not None else None)
 
         def __str__(this):
             return f'user: {this.user}\ntime: {this.time}\nURL: {this.url}\nname: {this.name}\ntitle: {this.title}'
@@ -172,7 +193,16 @@ class discuss(resource):
     def get_topics(this):
         if this.topic is not None: return this.topic;
         this.topic = [discuss.content(this, i.find('a').get('href', None), i.find('a').text.strip()) if i.find('a') is not None else None for i in bs(this.course.rq.get(this.url).text, 'html.parser').find_all('th', class_ = 'topic')]
+        super().set_content(this.topic)
         return this.topic
+    
+    def init(this):
+        ans = this.get_topics()
+        # for i in range(len(ans)):
+        #     ans[i].get_content()
+        super().set_content(ans)
+        # this.topic = ans
+        return ans
     
     # def get_content(this, index: int):
     #     if len(this.topic) == 0:
