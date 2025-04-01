@@ -12,7 +12,8 @@ class moodle(dict):
         elif session: self.rq = requests.Session(); self.rq.cookies.set('MoodleSession', session, domain = 'moodle.ncku.edu.tw')
         else: error('Neither session nor requests session were given.'); exit(-1)
         self.soup = None
-        self.username = self.get_username().strip()
+        self.username = self.get_username()
+        if self.username is not None: self.username = self.username.strip();
         self.logined = self.username is not None
         self.sync()
     
