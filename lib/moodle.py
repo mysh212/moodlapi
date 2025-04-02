@@ -54,6 +54,7 @@ class course(dict):
     def __init__(self, name, url, session: str = None, moodle: moodle = None, rq: requests.Session = None):
         self.name = name
         self.url = url
+        self.id = url.split('id=', 1)[1] if self.url is not None else None
         if self.url is not None: self.enabled = True
         else: self.enabled = False
         if moodle is not None: self.rq = moodle.rq; self.moodle = moodle
@@ -69,11 +70,11 @@ class course(dict):
         this.rq = x.rq
 
     def sync(this):
-        super().__init__(name = this.name, url = this.url)
+        super().__init__(name = this.name, url = this.url, id = this.id)
 
     def __str__(self):
         if self.enabled:
-            return f'Name: {self.name}\nURL: {self.url}'
+            return f'Name: {self.name}\nURL: {self.url}\nID: {self.id}'
         else:
             return f'Name: {self.name}'
         
@@ -95,6 +96,18 @@ class course(dict):
                 #     continue
                 # content.append([i.find('a').get('href'), i.text])
             ans.append(section(this, title, content))
+        return ans
+    
+    def get_grades(this):
+        url = f'''https://moodle.ncku.edu.tw/grade/report/user/index.php?id={this.id}'''
+        html = this.rq.get(url)
+        soup = bs(html.text, 'html.parser')
+
+        table = soup.find('table')
+        columns = [i.text for i in table.find('thead').find_all('th')]
+        data = [[i.find('th').text if i.find('th') is not None else None, *[j.text for j in i.find_all('td')]] for i in table.find('tbody').find_all('tr')]
+        ans = {'columns': columns, 'data': data}
+
         return ans
     
     # def __dict__
