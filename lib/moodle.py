@@ -243,6 +243,11 @@ class homework(resource):
         this.contents = [[i.find('th').text, {'content': i.find('td').text, 'html': str(i.find('td'))}] for i in table.find_all('tr')]
         this.contents = dict(this.contents)
 
+        tmp = soup.find('div', class_ = 'fileuploadsubmission')
+        files = [[i.get('href', None), i.text] for i in tmp.find_all('a') if 'action-icon' not in i.get('class', [])] if tmp is not None else []
+        if files is not None:
+            this.contents['files'] = files
+
         intro = soup.select_one('div#intro')
         if intro is not None:
             this.contents['intro'] = {'content': intro.text, 'html': str(intro)}
