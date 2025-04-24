@@ -137,7 +137,6 @@ class login:
         }, cookies = {
             'MoodleSession': session
         }, headers = headers, allow_redirects = False)
-        del self.password
         try:
             self.session = dict([i.split('=', 1) for i in self.pre.headers['Set-Cookie'].split('; ')])['MoodleSession']
             debug(self.session)
@@ -170,6 +169,7 @@ class login:
         else:
             info('========== Final Token ==========')
             info(f'{session:^33}')
+        del self.password
         return True
     
     def auto(self):

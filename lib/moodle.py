@@ -59,7 +59,7 @@ class course(dict):
         else: self.enabled = False
         if moodle is not None: self.rq = moodle.rq; self.moodle = moodle
         elif rq: self.rq = rq
-        elif session: self.rq = requests.Session(); self.rq.cookies.set(MoodleSession, session, domain = 'moodle.ncku.edu.tw')
+        elif session: self.rq = requests.Session(); self.rq.cookies.set('MoodleSession', session, domain = 'moodle.ncku.edu.tw')
         else: error('Neither session nor requests session were given.'); exit(-1)
         self.sync()
 
@@ -149,6 +149,7 @@ class resource(dict):
         this.url = x.url
         this.html = x.html
         this.type = x.type
+        this.content = x.content
         this.sync()
 
     def sync(this):
@@ -225,3 +226,33 @@ class discuss(resource):
     #         error('Invalid index getting content of a discuss thread')
     #         return None
         
+class homework(resource):
+
+    def __init__(this, resource: resource):
+        if resource.type != 'modtype_assign':
+            warning('Converting resource which is not assignment into it.')
+        this.content = None
+        super().copy(resource)
+
+    def get_content(this):
+        if this.content is not None: return this.content;
+
+        html = this.course.rq.get(this.url)
+        soup = bs(html.text, 'html.parser')
+        table = soup.find('div', class_ = 'submissionsummarytable')
+        this.contents = [[i.find('th').text, {'content': i.find('td').text, 'html': str(i.find('td'))}] for i in table.find_all('tr')]
+        this.contents = dict(this.contents)
+
+        intro = soup.select_one('div#intro')
+        if intro is not None:
+            this.contents['intro'] = {'content': intro.text, 'html': str(intro)}
+
+        return this.contents
+    
+    def init(this):
+        ans = this.get_content()
+        # for i in range(len(ans)):
+        #     ans[i].get_content()
+        super().set_content(ans)
+        # this.topic = ans
+        return ans
