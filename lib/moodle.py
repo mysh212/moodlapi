@@ -275,7 +275,7 @@ class page(resource):
 
         html = this.course.rq.get(this.url)
         soup = bs(html.text, 'html.parser')
-        this.content = soup.find('div', role = 'main').find('div')
+        this.content = str(soup.find('div', role = 'main').find('div'))
 
         return this.content
     
