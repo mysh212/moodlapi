@@ -261,3 +261,28 @@ class homework(resource):
         super().set_content(ans)
         # this.topic = ans
         return ans
+    
+class page(resource):
+
+    def __init__(this, resource: resource):
+        if resource.type != 'modtype_page':
+            warning('Converting resource which is not page into it.')
+        this.content = None
+        super().copy(resource)
+
+    def get_content(this):
+        if this.content is not None: return this.content;
+
+        html = this.course.rq.get(this.url)
+        soup = bs(html.text, 'html.parser')
+        this.content = soup.find('div', role = 'main').find('div')
+
+        return this.content
+    
+    def init(this):
+        ans = this.get_content()
+        # for i in range(len(ans)):
+        #     ans[i].get_content()
+        super().set_content(ans)
+        # this.topic = ans
+        return ans
