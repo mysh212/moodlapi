@@ -1,21 +1,37 @@
 from core.general import *
-from lib.moodle import get_all_contents
-from lib.diff import main
-import lib.io
+import lib.login as login
+import lib.moodle as moodle
+
 import json
 
-f = get_all_contents()
-lib.io.save(f)
+def encode(x):
+    return json.loads(json.dumps(x))
 
-# for i in f:
-#     info([i['title'], i['url'], i['id']])
-#     for k in i['data']:
-#         warning((k['title'], k['url']))
-#         for j in k['data']:
-#             info([j['text'], j['ishomework']])
-#             # debug(j.keys())
-#     input()
+lg = login.login(*read_from_file('.env').split())
 
-ans = lib.diff.main(lib.io.translate(json.loads(read_from_file('last.json.bkp'))), lib.io.translate(lib.io.get()))
-for i in ans:
-    warning(i)
+info(str(type(lg)))
+
+if lg.auto():
+	info(lg.session)
+	write_to_file('session.st', lg.session)
+
+session = read_from_file('session.st')
+
+md = moodle.moodle(session)
+debug(encode(md))
+info(md)
+debug(md.logined)
+debug(encode(md.get_courses()))
+# ans = [[i, [j.init() for j in i.get_contents()]] for i in moodle(session = read_from_file('session.st')).get_courses()[:15]]
+
+# for i in md.get_courses():
+#     info(i.name)
+#     debug(encode(i))
+
+# for i in md.get_courses()[::-1]:
+#      for j in i.get_contents():
+#           for k in j.content:
+#                if k.type == 'modtype_forum':
+#                     for l in moodle.discuss(k).get_topics():
+#                         info(l.get_content())
+#                         quit()

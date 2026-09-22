@@ -1,6 +1,8 @@
-token.debug.tmp
+.env 
+__pycache__ 
+t.* 
+*.ipynb 
 *.json
-*.bkp
-__pycache__
-t.py
+*.st
+*.png
 *.html
